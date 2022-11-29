@@ -83,6 +83,6 @@ export function makeFen(squares: Array<square>): string {
     return arr.join("/");
 }
 
-// export function parseFen(fen: string): Array<Array<square>> {
-    
+// export function parseFen(fen: string): Array<square> {
+//     for()
 // }

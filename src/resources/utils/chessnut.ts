@@ -201,9 +201,6 @@ export class ChessNut {
             const copy = new chess.Chess(this.chess.fen())
             copy.move(move);
             const newFen = copy.fen().split(" ")[0];
-            if(newFen === "rnbkqbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBKQBNR") {
-                console.log("WTF");
-            }
             return fen === newFen;
         });
 
@@ -212,11 +209,10 @@ export class ChessNut {
             if(this.chess.inCheck()) {
                 this.boop(440, 100);
             }
-            this.boardStateCallback(this.chess.fen());
         } else {
-            // we're playing and an invalid sate 
-            return;
+            
         }
+        this.boardStateCallback(this.chess.fen());
     } else {
         this.chess.load(fen + " w - - 0 1");
         this.boardStateCallback(fen);

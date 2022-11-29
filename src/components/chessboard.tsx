@@ -15,7 +15,7 @@ export default function ChessBoard({ position, playing, playGame }: props) {
       {/* because React-Chessboard's type signature is wrong */}
       {/* @ts-ignore */}
       <Chessboard position={position} arePiecesDraggable={false} />
-      {playing !== undefined && playing !== null && !playing && <button onClick={() => {playGame()}}>Start Game!</button> }
+      {playing === false && <button onClick={() => {playGame()}}>Start Game!</button> }
     </div>
   );
 }
