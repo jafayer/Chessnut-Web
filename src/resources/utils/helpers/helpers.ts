@@ -55,4 +55,34 @@ export function getSquare(square: string, board: Array<Array<square>>): square {
     return board[rank][file];
 }
 
-export function makeProcessedBoardState(){}
+export function makeFen(squares: Array<square>): string {
+    const arr = [];
+    for(let i = 0; i <= 7; i++) {
+        // get rows in reverse order
+        const row = squares.slice(8*(7-i), 8*(7-i)+8);
+        let str = "";
+        row.forEach(square => {
+            const piece = square.pieceInfo;
+            if(piece === null) {
+                const lastChar = str[str.length-1];
+                if(!isNaN(parseInt(lastChar))) {
+                    str = str.slice(0, str.length - 1) + (parseInt(lastChar) + 1).toString();
+                } else {
+                    str = str + "1"
+                }
+            } else {
+                const letter = piece.color === 'w'
+                    ? piece.piece.toUpperCase()
+                    : piece.piece.toLowerCase();
+                str = str += letter;
+            }
+        });
+        arr.push(str);
+    }
+
+    return arr.join("/");
+}
+
+// export function parseFen(fen: string): Array<Array<square>> {
+    
+// }

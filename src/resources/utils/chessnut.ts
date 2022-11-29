@@ -1,4 +1,4 @@
-import { convertCJSToCB, pieceData, convertPieceToDB, indexToSquareCoords, getSquare, square } from "./helpers/helpers";
+import { convertCJSToCB, pieceData, convertPieceToDB, indexToSquareCoords, getSquare, makeFen, square } from "./helpers/helpers";
 import * as chess from "chess.js";
 
 const files = "abcdefgh";
@@ -87,7 +87,6 @@ export class ChessNut {
   // Need these declared up top to stop typescript from complaining
   device;
   lights;
-  previousBoardState: Array<Array<square>>;
   boardStateCallback: CallableFunction;
   ledCoolDown: number;
   chess: chess.Chess;
@@ -97,9 +96,8 @@ export class ChessNut {
     // I don't think there's a good HID typings that exists?
     this.device = device;
     this.boardStateCallback = setBoardState;
-    this.previousBoardState = [];
     this.ledCoolDown = 0;
-    this.chess = new chess.Chess();
+    this.chess = new chess.Chess("");
     this.playing = false;
     device.addEventListener("inputreport", (event: any) => {
       const { data, reportId } = event;
@@ -175,19 +173,6 @@ export class ChessNut {
       }
     });
 
-    // Don't push an update to react if the board state is identical
-    // to previous state
-    const flattenedPrev = this.previousBoardState.flat();
-    const isEq = pieces.every((val, index) => {
-        const prev = flattenedPrev[index];
-        // if null, will be null, otherwise, will convert square to string
-        // which can be compared
-        return convertPieceToDB(val) === convertPieceToDB(prev?.pieceInfo);
-    });
-    if (isEq) {
-      return;
-    }
-
     // Add square names to data
     const squares: Array<square> = pieces.map((piece, index) => {
         return {
@@ -195,51 +180,51 @@ export class ChessNut {
             pieceInfo: piece,
         };
     });
-    // split data into 8x8 nested array
-    const board: Array<Array<square>> = [];
-    for(let i = 0; i < 8; i++) {
-        const rank: Array<square> = squares.slice(i*8, (i*8) + 8);
-        board.push(rank);
-    }
-    // ^ final internal representation
 
-    const processedBoardState = squares.reduce((prev, square, index) => {
-      const rank: number = Math.floor(index / 8) + 1;
-      const file = "abcdefgh"[index % 8];
-      return {
-        ...prev,
-        [file + rank]: convertPieceToDB(square.pieceInfo),
-      };
-    }, {});
+    const fen = makeFen(squares);
+    const previousBoardState = this.chess.fen().split(' ')[0];
+    // Don't push an update to react if the board state is identical
+    // to previous state
+    if (fen === previousBoardState) {
+        return;
+    }
 
     if(this.playing) {
+        // by this point, this.chess.reset() should have been called
         // get all possible moves
-        const possibleMoves = this.chess.moves({verbose: true});
+        const possibleMoves = this.chess.moves();
         // for every possible move,
-        // check if that piece is on the correct square
+        // calculate resulting FEN and compare to new FEN
         // @ts-ignore
+        // because typescript is angry at .find for some reason
         const validMove = possibleMoves.find((move: chess.Move) => {
-            const square = getSquare(move.to, board);
-            const movePieceData: pieceData = {
-                piece: move.piece,
-                color: move.color,
+            const copy = new chess.Chess(this.chess.fen())
+            copy.move(move);
+            const newFen = copy.fen().split(" ")[0];
+            if(newFen === "rnbkqbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBKQBNR") {
+                console.log("WTF");
             }
-            return convertPieceToDB(movePieceData) === convertPieceToDB(square.pieceInfo);
+            return fen === newFen;
         });
 
         if(validMove) {
             this.chess.move(validMove);
+            if(this.chess.inCheck()) {
+                this.boop(440, 100);
+            }
+            this.boardStateCallback(this.chess.fen());
         } else {
+            // we're playing and an invalid sate 
             return;
         }
+    } else {
+        this.chess.load(fen + " w - - 0 1");
+        this.boardStateCallback(fen);
     }
-
-    this.boardStateCallback(processedBoardState);
-    this.previousBoardState = board;
   }
 
   startGame() {
-    console.log("STARTING GAME");
+    this.boop(880, 100);
     this.playing = true;
     this.chess.reset();
   }
