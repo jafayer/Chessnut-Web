@@ -22,28 +22,17 @@ function App() {
           Connect to ChessNut board
         </button>
       )}
-      {board && (
-        <button
-          onClick={() => {
-            board.boop(220, 1000);
-          }}
-        >
-          Bop it
-        </button>
-      )}
-      {board && (
-        <button
-          onClick={() => {
-            board.setLights(["a1", "b2", "c3", "a8", "f6"]);
-            // board.setLights([])
-          }}
-        >
-          Light it
-        </button>
-      )}
-      {board && <ChessBoard position={boardState} />}
+      {board && <ChessBoard position={boardState} playGame={() => {playGame(board)}} playing={board?.playing} />}
     </div>
   );
+
+  function playGame(boardClass: typeof board) {
+    if(!boardClass) {
+      return;
+    }
+
+    boardClass.startGame();
+  }
 }
 
 export default App;
