@@ -1,57 +1,22 @@
-import { convertCJSToCB, pieceData, convertPieceToDB, indexToSquareCoords, getSquare, makeFen, square } from "./helpers/helpers";
+import { piece } from "./helpers/helpers";
 import * as chess from "chess.js";
+import { State } from "./gameState";
 
 const files = "abcdefgh";
-const chessPieceMap: {[key:string]:null | pieceData }= {
-  0: null,
-  7: {
-    color: chess.WHITE,
-    piece: chess.PAWN,
-  },
-  9: {
-    color: chess.WHITE,
-    piece: chess.BISHOP,
-  },
-  10: {
-    color: chess.WHITE,
-    piece: chess.KNIGHT,
-  },
-  6: {
-    color: chess.WHITE,
-    piece: chess.ROOK,
-  },
-  11: {
-    color: chess.WHITE,
-    piece: chess.QUEEN,
-  },
-  12: {
-    color: chess.WHITE,
-    piece: chess.KING,
-  },
-  4: {
-    color: chess.BLACK,
-    piece: chess.PAWN,
-  },
-  3: {
-    color: chess.BLACK,
-    piece: chess.BISHOP,
-  },
-  5: {
-    color: chess.BLACK,
-    piece: chess.KNIGHT,
-  },
-  8: {
-    color: chess.BLACK,
-    piece: chess.ROOK,
-  },
-  1: {
-    color: chess.BLACK,
-    piece: chess.QUEEN,
-  },
-  2: {
-    color: chess.BLACK,
-    piece: chess.KING,
-  },
+const chessPieceMap: {[key:string]: piece }= {
+  0: "",
+  7: "P",
+  9: "B",
+  10: "N",
+  6: "R",
+  11: "Q",
+  12: "K",
+  4: "p",
+  3: "b",
+  5: "n",
+  8: "r",
+  1: "q",
+  2: "k",
 };
 
 export async function connect(
@@ -86,10 +51,9 @@ export async function connect(
 export class ChessNut {
   // Need these declared up top to stop typescript from complaining
   device;
-  lights;
+  state: State;
   boardStateCallback: CallableFunction;
   ledCoolDown: number;
-  chess: chess.Chess;
   playing: boolean;
 
   constructor(device: any, setBoardState: CallableFunction) {
@@ -97,7 +61,8 @@ export class ChessNut {
     this.device = device;
     this.boardStateCallback = setBoardState;
     this.ledCoolDown = 0;
-    this.chess = new chess.Chess("");
+    // initialize empty board state
+    this.state = new State([])
     this.playing = false;
     device.addEventListener("inputreport", (event: any) => {
       const { data, reportId } = event;
@@ -106,49 +71,22 @@ export class ChessNut {
         this.setBoardState(new Uint8Array(data.buffer).slice(1, 33));
       }
     });
-    this.lights = [];
-    for (let rank = 1; rank <= 8; rank++) {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        this.lights.push({ [file + rank]: 0 });
-      }
-    }
   }
 
-  setLights(lights: Array<string>) {
+  setLights(lights: Array<chess.Square>) {
+    const board = [0,0,0,0,0,0,0,0];
     const now = new Date().getTime();
     if (now - this.ledCoolDown < 500) {
       return;
     }
-    const board = [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-    ];
+    
     lights.forEach((light) => {
-      const file = files.indexOf(light.slice(0, 1));
-      const row = 7 - (parseInt(light.slice(1, 2)) - 1);
-      console.log({ file, row });
-      board[row][file] = 1;
+      const file = 7 - files.indexOf(light.slice(0, 1));
+      const rank = 7 - (parseInt(light.slice(-1)) - 1);
+      board[rank] += 2**file;
     });
-
-    const binaries = board.map((row, index) => {
-      let led = 0;
-      row.forEach((square) => {
-        if (square === 1) {
-          led += 1 << index;
-        }
-      });
-      return led;
-    });
-
     this.ledCoolDown = now;
-    this.device.sendReport(0x0a, new Uint8Array([0x08, ...binaries]));
+    this.device.sendReport(0x0a, new Uint8Array([0x08, ...board]));
   }
 
   boop(freq: number, duration: number) {
@@ -162,10 +100,9 @@ export class ChessNut {
 
   setBoardState(boardState: Uint8Array) {
     // convert 32 bytes to 64 nibbles
-    // h8...a1
     const nibbles = this.extractNibbles(boardState);
     // map each nibble to the appropriate piece
-    const pieces: Array<pieceData|null> = nibbles.reverse().map((code: number) => {
+    const pieces: Array<piece> = nibbles.map((code: number) => {
       if (chessPieceMap.hasOwnProperty(code)) {
         return chessPieceMap[code as keyof typeof chessPieceMap];
       } else {
@@ -173,56 +110,55 @@ export class ChessNut {
       }
     });
 
-    // Add square names to data
-    const squares: Array<square> = pieces.map((piece, index) => {
-        return {
-            coords: indexToSquareCoords(index),
-            pieceInfo: piece,
-        };
-    });
+    // create internal stateful representation of boardState
+    // pass in a1..h8
+    const incomingState = new State(pieces.reverse());
 
-    const fen = makeFen(squares);
-    const previousBoardState = this.chess.fen().split(' ')[0];
+   
+    if(this.playing) {
+      if(this.state.chess.isGameOver()) {
+        // kind of a silly way to check winner but oh well
+        const winningSide = this.state.chess.turn() === chess.WHITE ? chess.BLACK : chess.WHITE;
+        this.setLights(this.state.getWinningSidePieces(winningSide));
+      } else {
+        const squaresToIlluminate = this.state.getMovedSquares(incomingState);
+        this.setLights(squaresToIlluminate);
+      }
+    }
+
     // Don't push an update to react if the board state is identical
     // to previous state
-    if (fen === previousBoardState) {
+    if (incomingState.isEq(this.state)) {
         return;
     }
 
     if(this.playing) {
-        // by this point, this.chess.reset() should have been called
-        // get all possible moves
-        const possibleMoves = this.chess.moves();
-        // for every possible move,
-        // calculate resulting FEN and compare to new FEN
-        // @ts-ignore
-        // because typescript is angry at .find for some reason
-        const validMove = possibleMoves.find((move: chess.Move) => {
-            const copy = new chess.Chess(this.chess.fen())
-            copy.move(move);
-            const newFen = copy.fen().split(" ")[0];
-            return fen === newFen;
-        });
-
-        if(validMove) {
-            this.chess.move(validMove);
-            if(this.chess.inCheck()) {
+        // check that some move from this.state
+        // could result in incomingState
+        const possibleMove = this.state.possibleMove(incomingState);
+        if(possibleMove) {
+            this.state.chess.move(possibleMove);
+            if(this.state.chess.inCheck()) {
                 this.boop(440, 100);
             }
         } else {
+            // position is different, but there is no valid move on board.
+            // Illuminate all squares that aren't consistent with
+            // previousBoardState FEN  
             
         }
-        this.boardStateCallback(this.chess.fen());
+        this.boardStateCallback(this.state.getFEN());
     } else {
-        this.chess.load(fen + " w - - 0 1");
-        this.boardStateCallback(fen);
+        // replace entire state with incomingState
+        this.state.updateFromState(incomingState);
+        this.boardStateCallback(this.state.getFEN());
     }
   }
 
   startGame() {
     this.boop(880, 100);
     this.playing = true;
-    this.chess.reset();
+    this.state.reset();
   }
 
   private extractNibbles(uiarr: Uint8Array): Array<number> {

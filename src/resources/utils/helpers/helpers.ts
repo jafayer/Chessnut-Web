@@ -1,4 +1,4 @@
-import chess from "chess.js";
+import * as chess from "chess.js";
 
 export const files = "abcdefgh";
 
@@ -6,7 +6,7 @@ export function getFileNumber(file: string) {
     return files.indexOf(file);
 }
 
-export type piece = typeof chess.PAWN | typeof chess.BISHOP | typeof chess.KNIGHT | typeof chess.ROOK | typeof chess.QUEEN | typeof chess.KING;
+export type piece = "" | "p" | "P" | "n" | "N" | "b" | "B" | "r" | "R" | "q" | "Q" | "k" | "K";
 
 export type pieceData = {
     piece: piece,
@@ -18,21 +18,22 @@ export type square = {
     pieceInfo: null | pieceData,
 }
 
+export type cjsSquare = {
+    square: string,
+    type: chess.PieceSymbol,
+    color: chess.Color
+}
+
 export function convertCJSToCB(color: typeof chess.WHITE | typeof chess.BLACK, piece: piece) {
     return color.toLowerCase() + piece.toUpperCase();
 }
 
-export function convertPieceToDB(piece: pieceData | null) {
-    if(piece === null || piece === undefined) {
-        return "";
-    } else {
-        return piece.color.toLowerCase() + piece.piece.toUpperCase();
-    }
-}
-
-export function indexToSquareCoords(index: number): string {
-    const file = files[Math.floor(index/8)];
-    const rank = (index % 8) + 1;
+export function indexToSquareCoords(index: number): chess.Square {
+    // a1..h8
+    const file = files[index % 8];
+    const rank = Math.floor(index/ 8)+1;
+    // @ts-ignore
+    // would be really annoying to do this properly
     return file+rank;
 }
 
@@ -83,6 +84,49 @@ export function makeFen(squares: Array<square>): string {
     return arr.join("/");
 }
 
-// export function parseFen(fen: string): Array<square> {
-//     for()
-// }
+export function convertFENCharToChessJSPiece(piece: piece): chess.Piece | undefined {
+    const color = (piece === piece.toUpperCase()) ? chess.WHITE : chess.BLACK;
+
+    switch(piece.toLowerCase()) {
+        case "p":
+            return {
+                color,
+                type: chess.PAWN,
+            }
+        case "b":
+            return {
+                color,
+                type: chess.BISHOP,
+            }
+        case "n":
+            return {
+                color,
+                type: chess.KNIGHT,
+            }
+        case "r":
+            return {
+                color,
+                type: chess.ROOK,
+            }
+        case "q":
+            return {
+                color,
+                type: chess.QUEEN,
+            }
+        case "k":
+            return {
+                color,
+                type: chess.KING,
+            }
+        default:
+            return undefined;
+    }
+}
+
+export function convertCJSSquareToPiece(square: cjsSquare | null): piece {
+    if(!square) {
+        return "";
+    }
+    // Sorry for the type assertion I got lazy
+    return square.color === "w" ? square.type.toUpperCase() as piece : square.type.toLowerCase() as piece
+}
