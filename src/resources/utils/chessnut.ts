@@ -62,7 +62,7 @@ export class ChessNut {
     this.boardStateCallback = setBoardState;
     this.ledCoolDown = 0;
     // initialize empty board state
-    this.state = new State([...Array(64).keys()].map(i => ""))
+    this.state = new State([])
     this.playing = false;
     device.addEventListener("inputreport", (event: any) => {
       const { data, reportId } = event;
@@ -85,7 +85,7 @@ export class ChessNut {
       const rank = 7 - (parseInt(light.slice(-1)) - 1);
       board[rank] += 2**file;
     });
-    console.log({board});
+    console.log({lights});
     this.ledCoolDown = now;
     this.device.sendReport(0x0a, new Uint8Array([0x08, ...board]));
   }
@@ -115,16 +115,27 @@ export class ChessNut {
     // pass in a1..h8
     const incomingState = new State(pieces.reverse());
 
+   
+    if(this.playing) {
+      if(this.state.chess.isGameOver()) {
+        // kind of a silly way to check winner but oh well
+        const winningSide = this.state.chess.turn() === chess.WHITE ? chess.BLACK : chess.WHITE;
+        this.setLights(this.state.getWinningSidePieces(winningSide));
+      } else {
+        const squaresToIlluminate = this.state.getMovedSquares(incomingState);
+        this.setLights(squaresToIlluminate);
+      }
+    }
+
     // Don't push an update to react if the board state is identical
     // to previous state
     if (incomingState.isEq(this.state)) {
-        // return;
+        return;
     }
 
     if(this.playing) {
         // check that some move from this.state
         // could result in incomingState
-        console.log({won: this.state.chess.isGameOver()});
         const possibleMove = this.state.possibleMove(incomingState);
         if(possibleMove) {
             this.state.chess.move(possibleMove);
@@ -134,9 +145,7 @@ export class ChessNut {
         } else {
             // position is different, but there is no valid move on board.
             // Illuminate all squares that aren't consistent with
-            // previousBoardState FEN
-            const squaresToIlluminate = this.state.getMovedSquares(incomingState);
-            this.setLights(squaresToIlluminate);
+            // previousBoardState FEN  
             
         }
         this.boardStateCallback(this.state.getFEN());

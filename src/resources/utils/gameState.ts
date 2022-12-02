@@ -58,11 +58,8 @@ export class State {
         }
     }
 
+    
     getMovedSquares(incomingState: State): Array<chess.Square> {
-
-        function isSquare(square: chess.Square | undefined) {
-            return !!square;
-        }
         // return all squares which don't match current internal state
         const pieces = this.boardToPieces();
         const incomingPieces = incomingState.boardToPieces();
@@ -72,6 +69,23 @@ export class State {
             }
         }).filter(square => square != undefined);
         
+        return filtered as chess.Square[];
+    }
+
+    getWinningSidePieces(side: chess.Color): Array<chess.Square> {
+        const pieces = this.boardToPieces();
+        const filtered = pieces.map((piece, index) => {
+            if(piece.toUpperCase() === piece) { // white
+                if(side === chess.WHITE) {
+                    return indexToSquareCoords(index);
+                }
+            } else { // black
+                if(side === chess.BLACK) {
+                    return indexToSquareCoords(index);
+                }
+            }
+        }).filter(square => square != undefined);
+
         return filtered as chess.Square[];
     }
 
