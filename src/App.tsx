@@ -22,7 +22,7 @@ function App() {
           Connect to ChessNut board
         </button>
       )}
-      {board && <ChessBoard position={boardState} playGame={() => {playGame(board)}} playing={board?.playing} />}
+      {board && <ChessBoard position={boardState} playGame={() => {playGame(board)}} playing={board?.playing} reset={() => {reset(board)}} />}
     </div>
   );
 
@@ -32,6 +32,16 @@ function App() {
     }
 
     boardClass.startGame();
+  }
+
+  function reset(boardClass: typeof board) {
+    console.log("TEST")
+    if(!boardClass) {
+      console.log
+      return
+    }
+
+    boardClass.reset();
   }
 }
 

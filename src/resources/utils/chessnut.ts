@@ -161,6 +161,12 @@ export class ChessNut {
     this.state.reset();
   }
 
+  reset() {
+    console.log("RESETTING!");
+    this.state.reset();
+    this.setLights([]);
+  }
+
   private extractNibbles(uiarr: Uint8Array): Array<number> {
     const arr = Array.from(uiarr);
     const stuff = arr.map((byte) => {
