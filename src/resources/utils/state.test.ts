@@ -107,7 +107,7 @@ test("Reset works", () => {
     expect(testState.getFEN()).toBe(newState.getFEN());
 });
 
-test("Possible Moves works", () => {
+test("Possible Moves works with castling", () => {
     const testState = new State(INITIAL_STATE);
     testState.chess.reset();
     // @ts-ignore
@@ -124,10 +124,28 @@ test("Possible Moves works", () => {
     testState.updateNamedMove("Nf6");
     // @ts-ignore
     const incomingState = testState.makeCopy();
-    console.log({moves: incomingState.chess.pgn()});
     // @ts-ignore
-    const m = incomingState.updateNamedMove("O-O");
+    incomingState.updateNamedMove("O-O");
 
 
     expect(testState.possibleMove(incomingState)).toEqual('O-O');
-})
+});
+
+test("En passant works", () => {
+    const testState = new State([]);
+    testState.reset();
+    // @ts-ignore
+    testState.updateNamedMove("e4");
+    // @ts-ignore
+    testState.updateNamedMove("a6");
+    // @ts-ignore
+    testState.updateNamedMove("e5");
+    // @ts-ignore
+    testState.updateNamedMove("d5");
+
+    const incomingState = new State([]);
+    incomingState.reset();
+    incomingState.chess.load('rnbqkbnr/1pp1pppp/p2P4/8/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 3');
+    const possibleMove = testState.possibleMove(incomingState);
+    expect(possibleMove).toEqual('exd6');
+});

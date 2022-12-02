@@ -144,17 +144,15 @@ export class ChessNut {
     // Don't push an update to react if the board state is identical
     // to previous state
     if (incomingState.isEq(this.state)) {
-        return;
+        // return;
     }
 
     if(this.playing) {
         // check that some move from this.state
         // could result in incomingState
         const possibleMove = this.state.possibleMove(incomingState);
-
         if(possibleMove) {
             this.state.chess.move(possibleMove);
-            this.state.state = incomingState.state;
             if(this.state.chess.inCheck()) {
                 this.boop(440, 100);
             }

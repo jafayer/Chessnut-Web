@@ -4,16 +4,10 @@ import {piece, indexToSquareCoords, convertFENCharToChessJSPiece, convertCJSSqua
 
 export class State {
     chess;
-    state: Array<Array<piece>>
-    // State goes from h8..a1
     constructor(pieces: piece[]) {
-        // build internal 2D-array representation
-        // input should be a1..h8
-        // raw from chessboard
-        this.state = this.piecesToBoard(pieces);
         
         this.chess = new chess.Chess();
-        this.fillChessJS(this.state);
+        this.fillChessJS(pieces);
     }
 
     getFEN():string{
@@ -28,42 +22,28 @@ export class State {
         const newState = new State([]);
         newState.chess.reset();
         newState.chess.loadPgn(this.chess.pgn());
-        newState.state = this.state;
-
         return newState;
     }
 
     updateFromArray(pieces: Array<piece>) {
-        // update BOARD state destructively
-        // take a move, put it into chess.js,
-        // get the output of chess.board()
-        // convert and override internal representation
-        this.state = this.piecesToBoard(pieces);
-        this.fillChessJS(this.state);
+        // TODO: probably remove this or fillChessJS
+        this.fillChessJS(pieces);
     }
 
     updateNamedMove(move: chess.Move) {
         // update state in place
         // this is a bit of an ugly mish-mosh of board and game state
         const didMove = this.chess.move(move);
-        if(didMove) {
-            const newState = this.chess.board().map(row => row.map(square => convertCJSSquareToPiece(square)));
-            this.state = newState;
-
-            return true;
-        } else {
-            return false;
-        }
+        return didMove ? true : false;
     }
 
     updateFromState(newState: State) {
-        this.state = newState.state;
-        this.fillChessJS(this.state);
+        const pieces = newState.boardToPieces();
+        this.fillChessJS(pieces);
     }
 
     reset() {
         this.chess.reset();
-        this.state = this.boardToState();
     }
 
     possibleMove(incomingState: State) {
@@ -78,15 +58,16 @@ export class State {
         }
     }
 
-    private fillChessJS(state: Array<Array<piece>>) {
+    private fillChessJS(pieces: Array<piece>) {
         this.chess.clear();
-        state.forEach((row, rowIndex) => {
-            row.forEach((square, columnIndex) =>  {
-                const piece = convertFENCharToChessJSPiece(square);
-                if(piece) {
-                    this.chess.put(piece, this.getSquareName(rowIndex, columnIndex));
-                }
-            });
+        pieces.forEach((piece, index) => {
+            const squareName = indexToSquareCoords(index);
+            const pieceObject = convertFENCharToChessJSPiece(piece);
+            if(pieceObject) {
+                return this.chess.put(pieceObject, squareName);
+            } else {
+                return false;
+            }
         });
     }
 
@@ -102,10 +83,14 @@ export class State {
         return board;
     }
 
-    private boardToState(): Array<Array<piece>> {
-        return this.chess.board().map(row => {
-            return row.map(piece => convertCJSSquareToPiece(piece));
-        });
+    private boardToPieces(): Array<piece> {
+        // chess.board is a1..h8, ..., a1..h1,
+        const board = this.chess.board();
+        let toReturn: Array<piece> = [];
+        for(let i = 7; i >= 0; i--) {
+            toReturn = [...toReturn, ...board[i].map(pieceObj => convertCJSSquareToPiece(pieceObj))];
+        }
+        return toReturn;
     }
     
     private getSquareName(rowIndex: number, columnIndex: number): chess.Square {
@@ -113,9 +98,5 @@ export class State {
         const file = files[columnIndex];
         // @ts-ignore
         return file+rank;
-    }
-
-    private convertStateBackToArray() {
-        return this.state.reverse().flat();
     }
 }
