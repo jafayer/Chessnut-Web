@@ -51,7 +51,6 @@ export async function connect(
 export class ChessNut {
   // Need these declared up top to stop typescript from complaining
   device;
-  lights;
   state: State;
   boardStateCallback: CallableFunction;
   ledCoolDown: number;
@@ -72,48 +71,23 @@ export class ChessNut {
         this.setBoardState(new Uint8Array(data.buffer).slice(1, 33));
       }
     });
-    this.lights = [];
-    for (let rank = 1; rank <= 8; rank++) {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        this.lights.push({ [file + rank]: 0 });
-      }
-    }
   }
 
   setLights(lights: Array<chess.Square>) {
+    const board = [0,0,0,0,0,0,0,0];
     const now = new Date().getTime();
     if (now - this.ledCoolDown < 500) {
       return;
     }
-    const board = [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-    ];
+    
     lights.forEach((light) => {
-      const file = files.indexOf(light.slice(0, 1));
-      const row = 7 - (parseInt(light.slice(1, 2)) - 1);
-      board[row][file] = 1;
+      const file = 7 - files.indexOf(light.slice(0, 1));
+      const rank = 7 - (parseInt(light.slice(-1)) - 1);
+      board[rank] += 2**file;
     });
-
-    const binaries = board.map((row, index) => {
-      let led = 0;
-      row.forEach((square) => {
-        if (square === 1) {
-          led += 1 << index;
-        }
-      });
-      return led;
-    });
-
+    console.log({board});
     this.ledCoolDown = now;
-    this.device.sendReport(0x0a, new Uint8Array([0x08, ...binaries]));
+    this.device.sendReport(0x0a, new Uint8Array([0x08, ...board]));
   }
 
   boop(freq: number, duration: number) {
@@ -150,6 +124,7 @@ export class ChessNut {
     if(this.playing) {
         // check that some move from this.state
         // could result in incomingState
+        console.log({won: this.state.chess.isGameOver()});
         const possibleMove = this.state.possibleMove(incomingState);
         if(possibleMove) {
             this.state.chess.move(possibleMove);
@@ -161,7 +136,7 @@ export class ChessNut {
             // Illuminate all squares that aren't consistent with
             // previousBoardState FEN
             const squaresToIlluminate = this.state.getMovedSquares(incomingState);
-            // this.setLights(squaresToIlluminate);
+            this.setLights(squaresToIlluminate);
             
         }
         this.boardStateCallback(this.state.getFEN());
