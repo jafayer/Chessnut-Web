@@ -1,4 +1,4 @@
-import { convertCJSToCB, pieceData, convertPieceToDB, indexToSquareCoords, getSquare, makeFen, square, piece } from "./helpers/helpers";
+import { piece } from "./helpers/helpers";
 import * as chess from "chess.js";
 import { State } from "./gameState";
 
@@ -81,7 +81,7 @@ export class ChessNut {
     }
   }
 
-  setLights(lights: Array<square>) {
+  setLights(lights: Array<chess.Square>) {
     const now = new Date().getTime();
     if (now - this.ledCoolDown < 500) {
       return;
@@ -97,8 +97,8 @@ export class ChessNut {
       [0, 0, 0, 0, 0, 0, 0, 0],
     ];
     lights.forEach((light) => {
-      const file = files.indexOf((light.coords).slice(0, 1));
-      const row = 7 - (parseInt((light.coords).slice(1, 2)) - 1);
+      const file = files.indexOf(light.slice(0, 1));
+      const row = 7 - (parseInt(light.slice(1, 2)) - 1);
       board[row][file] = 1;
     });
 
@@ -160,6 +160,8 @@ export class ChessNut {
             // position is different, but there is no valid move on board.
             // Illuminate all squares that aren't consistent with
             // previousBoardState FEN
+            const squaresToIlluminate = this.state.getMovedSquares(incomingState);
+            // this.setLights(squaresToIlluminate);
             
         }
         this.boardStateCallback(this.state.getFEN());
@@ -175,10 +177,6 @@ export class ChessNut {
     this.playing = true;
     this.state.reset();
   }
-
-  // getMovedSquares(incomingstate: State): Array<square> {
-    
-  // }
 
   private extractNibbles(uiarr: Uint8Array): Array<number> {
     const arr = Array.from(uiarr);

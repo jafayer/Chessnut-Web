@@ -149,3 +149,16 @@ test("En passant works", () => {
     const possibleMove = testState.possibleMove(incomingState);
     expect(possibleMove).toEqual('exd6');
 });
+
+test("Return all moved squares from original position", () => {
+    const testState = new State([]);
+    testState.reset();
+    // @ts-ignore
+    testState.updateNamedMove('e4');
+    // @ts-ignore
+    testState.updateNamedMove('e5');
+    const copyState = testState.makeCopy();
+    // @ts-ignore
+    copyState.updateNamedMove("Nf3");
+    expect(testState.getMovedSquares(copyState)).toEqual(["g1", "f3"]);
+})

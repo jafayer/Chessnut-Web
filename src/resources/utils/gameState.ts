@@ -58,6 +58,23 @@ export class State {
         }
     }
 
+    getMovedSquares(incomingState: State): Array<chess.Square> {
+
+        function isSquare(square: chess.Square | undefined) {
+            return !!square;
+        }
+        // return all squares which don't match current internal state
+        const pieces = this.boardToPieces();
+        const incomingPieces = incomingState.boardToPieces();
+        const filtered = pieces.map((piece, index) => {
+            if(piece != incomingPieces[index]) {
+                return indexToSquareCoords(index)
+            }
+        }).filter(square => square != undefined);
+        
+        return filtered as chess.Square[];
+    }
+
     private fillChessJS(pieces: Array<piece>) {
         this.chess.clear();
         pieces.forEach((piece, index) => {
