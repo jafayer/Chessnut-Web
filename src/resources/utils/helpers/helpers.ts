@@ -104,7 +104,7 @@ export function convertPieceToDB(piece: pieceData | null) {
 }
 
 export function indexToSquareCoords(index: number): chess.Square {
-    // 
+    // a1..h8
     const file = files[index % 8];
     const rank = Math.floor(index/ 8)+1;
     // @ts-ignore
