@@ -85,7 +85,6 @@ export class ChessNut {
       const rank = 7 - (parseInt(light.slice(-1)) - 1);
       board[rank] += 2**file;
     });
-    console.log({lights});
     this.ledCoolDown = now;
     this.device.sendReport(0x0a, new Uint8Array([0x08, ...board]));
   }

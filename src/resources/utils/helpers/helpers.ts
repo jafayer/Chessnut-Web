@@ -6,73 +6,6 @@ export function getFileNumber(file: string) {
     return files.indexOf(file);
 }
 
-export const INITIAL_STATE: Array<piece> = [
-    "R",
-    "N",
-    "B",
-    "Q",
-    "K",
-    "B",
-    "N",
-    "R",
-    "P",
-    "P",
-    "P",
-    "P",
-    "P",
-    "P",
-    "P",
-    "P",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "p",
-    "p",
-    "p",
-    "p",
-    "p",
-    "p",
-    "p",
-    "p",
-    "r",
-    "n",
-    "b",
-    "q",
-    "k",
-    "b",
-    "n",
-    "r"
-]
-
 export type piece = "" | "p" | "P" | "n" | "N" | "b" | "B" | "r" | "R" | "q" | "Q" | "k" | "K";
 
 export type pieceData = {
@@ -93,14 +26,6 @@ export type cjsSquare = {
 
 export function convertCJSToCB(color: typeof chess.WHITE | typeof chess.BLACK, piece: piece) {
     return color.toLowerCase() + piece.toUpperCase();
-}
-
-export function convertPieceToDB(piece: pieceData | null) {
-    if(piece === null || piece === undefined) {
-        return "";
-    } else {
-        return piece.color.toLowerCase() + piece.piece.toUpperCase();
-    }
 }
 
 export function indexToSquareCoords(index: number): chess.Square {

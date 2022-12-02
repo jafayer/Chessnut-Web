@@ -1,6 +1,6 @@
 import * as chess from "chess.js";
 import { ChessBoardProps } from "react-chessboard";
-import {piece, indexToSquareCoords, convertFENCharToChessJSPiece, convertCJSSquareToPiece, files, INITIAL_STATE} from "./helpers/helpers";
+import {piece, indexToSquareCoords, convertFENCharToChessJSPiece, convertCJSSquareToPiece, files} from "./helpers/helpers";
 
 export class State {
     chess;
