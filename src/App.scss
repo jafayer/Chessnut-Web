@@ -46,6 +46,7 @@ html, body {
 .App {
     background-color: var(--main-background);
     transition: .2s background-color;
+    min-height: 100vh;
 }
 
 /* Button & Element States */
@@ -73,9 +74,6 @@ html, body {
     }
 }
 
-.board {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+cg-container {
+    overflow: hidden;
 }

@@ -21,7 +21,9 @@ const chessPieceMap: {[key:string]: piece }= {
 
 export async function connect(
   callback: CallableFunction,
-  setBoardStateCB: CallableFunction
+  setBoardStateCB: CallableFunction,
+  setPlaying: CallableFunction,
+  setPgn: CallableFunction
 ) {
   try {
     // @ts-ignore
@@ -34,7 +36,7 @@ export async function connect(
     });
 
     if (device) {
-      const board = new ChessNut(device, setBoardStateCB);
+      const board = new ChessNut(device, setBoardStateCB, setPlaying, setPgn);
       await board.device.open();
       await board.device.sendReport(0x21, new Uint8Array([0x01, 0x00]));
       board.boop(560, 100);
@@ -55,8 +57,10 @@ export class ChessNut {
   boardStateCallback: CallableFunction;
   ledCoolDown: number;
   playing: boolean;
+  setPlaying: CallableFunction;
+  setPgn: CallableFunction
 
-  constructor(device: any, setBoardState: CallableFunction) {
+  constructor(device: any, setBoardState: CallableFunction, setPlaying: CallableFunction, setPgn: CallableFunction) {
     // I don't think there's a good HID typings that exists?
     this.device = device;
     this.boardStateCallback = setBoardState;
@@ -64,6 +68,8 @@ export class ChessNut {
     // initialize empty board state
     this.state = new State([])
     this.playing = false;
+    this.setPlaying = setPlaying;
+    this.setPgn = setPgn;
     device.addEventListener("inputreport", (event: any) => {
       const { data, reportId } = event;
       const { productId } = event.device;
@@ -71,6 +77,7 @@ export class ChessNut {
         this.setBoardState(new Uint8Array(data.buffer).slice(1, 33));
       }
     });
+    this.boardStateCallback(this.state.getFEN());
   }
 
   setLights(lights: Array<chess.Square>) {
@@ -148,6 +155,7 @@ export class ChessNut {
             
         }
         this.boardStateCallback(this.state.getFEN());
+        this.setPgn(this.state.chess.pgn());
     } else {
         // replace entire state with incomingState
         this.state.updateFromState(incomingState);
@@ -158,13 +166,14 @@ export class ChessNut {
   startGame() {
     this.boop(880, 100);
     this.playing = true;
+    this.setPlaying(true);
     this.state.reset();
+    this.boardStateCallback(this.state.getFEN());
   }
 
   reset() {
-    console.log("RESETTING!");
-    this.state.reset();
     this.setLights([]);
+    this.startGame();
   }
 
   private extractNibbles(uiarr: Uint8Array): Array<number> {

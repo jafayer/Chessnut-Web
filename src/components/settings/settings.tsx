@@ -14,7 +14,7 @@ export default function Settings({setTheme}:SettingsProps) {
     const handleOpen = () => {setOpen(true)};
     const handleClose = () => {setOpen(false)};
     return <div>
-        <FontAwesomeIcon  className={styles["cog"]} icon={faCog} color={theme === "light" ? blue[5] : blue[6]} onClick={handleOpen} />
+        <FontAwesomeIcon style={{zIndex: 999}} className={styles["cog"]} icon={faCog} color={theme === "light" ? blue[5] : blue[6]} onClick={handleOpen} />
         <Modal open={open} onCancel={handleClose} footer={null}>
             <h1>Settings</h1>
             <div>

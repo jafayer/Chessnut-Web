@@ -3,7 +3,6 @@ import { ThemeContext } from "../../../App";
 import { Button } from "antd";
 import { SizeType } from "antd/es/config-provider/SizeContext";
 import { ButtonType } from "antd/es/button";
-import { Theme } from "@ant-design/cssinjs";
 
 interface ButtonProps {
   children: ReactNode;
@@ -31,6 +30,9 @@ export default function DefaultButton({
       icon={icon ? icon : null}
       size={size ? size : "large"}
       onClick={onClick}
+      style={{
+        margin: 5
+      }}
       {...props}
     >
       {children}
