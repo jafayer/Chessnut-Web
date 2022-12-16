@@ -17,6 +17,13 @@ function App() {
   const [pgn, setPgn] = useState<string | null>(null);
   const [playing, setPlaying] = useState<boolean>(false);
 
+  console.log(import.meta.env.MODE);
+
+  if(import.meta.env.MODE === "development") {
+    //@ts-ignore
+    window.board = board;
+  }
+
   return (
     <ThemeContext.Provider value={theme}>
       <div className={"App"} data-theme={theme}>
