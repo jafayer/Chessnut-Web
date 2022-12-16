@@ -1,29 +1,29 @@
-import { useState } from "react";
-import "./App.css";
+import { useState, createContext, useContext, useEffect } from "react";
+import "./App.scss";
 import { ChessNut, connect } from "./resources/utils/chessnut";
 import ChessBoard from "./components/chessboard";
+import Connect from "./components/connect/connect";
+import Settings from "./components/settings/settings";
+import { Main } from "./components/main/main";
+import Header from "./components/header/header";
+
+
+export const ThemeContext = createContext("light");
 
 function App() {
+  const [theme, setTheme] = useState("light");
   const [board, setBoard] = useState<ChessNut | null>(null);
-  const [boardState, setBoardState] = useState<Object | null>(null);
-
-  if (board) {
-    console.log(boardState);
-  }
+  const [fen, setFen] = useState<string | null>(null);
+  const [pgn, setPgn] = useState<string | null>(null);
+  const [playing, setPlaying] = useState<boolean>(false);
 
   return (
-    <div className="App">
-      {!board && (
-        <button
-          onClick={() => {
-            connect(setBoard, setBoardState);
-          }}
-        >
-          Connect to ChessNut board
-        </button>
-      )}
-      {board && <ChessBoard position={boardState} playGame={() => {playGame(board)}} playing={board?.playing} reset={() => {reset(board)}} />}
-    </div>
+    <ThemeContext.Provider value={theme}>
+      <div className={"App"} data-theme={theme}>
+        <Header setTheme={setTheme} />
+        {connectOrMainScreen()}
+      </div>
+    </ThemeContext.Provider>
   );
 
   function playGame(boardClass: typeof board) {
@@ -35,13 +35,19 @@ function App() {
   }
 
   function reset(boardClass: typeof board) {
-    console.log("TEST")
     if(!boardClass) {
-      console.log
       return
     }
 
     boardClass.reset();
+  }
+
+  function connectOrMainScreen() {
+    if(!board) {
+      return <Connect handler={() => {connect(setBoard, setFen, setPlaying, setPgn)}} />
+    } else {
+      return <Main orientation={"white"} fen={fen} playGame={() => {playGame(board)}} playing={playing} reset={() => {reset(board)}} pgn={pgn} />
+    }
   }
 }
 

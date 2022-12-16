@@ -1,0 +1,79 @@
+:root {
+    /* app background */
+    --main-background: #eee;
+    
+    /* Primary button states */
+    --primary: #5b2ad4;
+    --primary-hover: #6530ea;
+    --primary-text: #fff;
+
+    /* Secondary button states */
+    --secondary: #6c42d4;
+    --secondary-hover: #734dd3;
+    --secondary-text: #fff;
+
+    /* Tertiary button states */
+    --tertiary: #dfd3f9;
+    --tertiary-hover: #e4dafb;
+    --tertiary-text: #5b2ad4;
+}
+
+[data-theme="dark"] {
+    /* app background */
+    --main-background: #141522;
+
+    /* Primary button states */
+    --primary: #6d37f6;
+    --primary-text: #fff;
+    --primary-hover: #6d36f8;
+
+    /* Secondary button states */
+    --secondary: #7847f5;
+    --secondary-hover: #895cfa;
+    --secondary-text: #fff;
+
+    /* Tertiary button states */
+    --tertiary: #dfd3f4;
+    --tertiary-hover: #dfd3f4;
+    --tertiary-text: #5b2ad4;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+.App {
+    background-color: var(--main-background);
+    transition: .2s background-color;
+    min-height: 100vh;
+}
+
+/* Button & Element States */
+.primary {
+    background-color: var(--primary);
+    color: var(--primary-text);
+    &:hover {
+        background-color: var(--primary-hover);
+    }
+}
+
+.secondary {
+    background-color: var(--secondary);
+    color: var(--secondary-text);
+    &:hover {
+        background-color: var(--secondary-hover);
+    }
+}
+
+.tertiary {
+    background-color: var(--tertiary);
+    color: var(--tertiary-text);
+    &:hover {
+        background-color: var(--tertiary-hover);
+    }
+}
+
+cg-container {
+    overflow: hidden;
+}
