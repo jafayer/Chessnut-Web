@@ -6,6 +6,7 @@ import Connect from "./components/connect/connect";
 import Settings from "./components/settings/settings";
 import { Main } from "./components/main/main";
 import Header from "./components/header/header";
+import {MODE} from "./config";
 
 
 export const ThemeContext = createContext("light");
@@ -17,9 +18,7 @@ function App() {
   const [pgn, setPgn] = useState<string | null>(null);
   const [playing, setPlaying] = useState<boolean>(false);
 
-  console.log(import.meta.env.MODE);
-
-  if(import.meta.env.MODE === "development") {
+  if(MODE === "development") {
     //@ts-ignore
     window.board = board;
   }

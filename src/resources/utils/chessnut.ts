@@ -2,6 +2,7 @@ import { piece } from "./helpers/helpers";
 import * as chess from "chess.js";
 import { State } from "./gameState";
 import { BoardEmulator } from "./helpers/BoardEmulator";
+import {MODE} from "../../config.js";
 
 const files = "abcdefgh";
 const chessPieceMap: {[key:string]: piece }= {
@@ -26,7 +27,7 @@ export async function connect(
   setPlaying: CallableFunction,
   setPgn: CallableFunction
 ) {
-  if(import.meta.env.MODE === "development") {
+  if(MODE === "development") {
     const board = new ChessNut(new BoardEmulator(), setBoardStateCB, setPlaying, setPgn);
     board.device.open();
     board.device.sendReport(0x21, new Uint8Array([0x01, 0x00]));
