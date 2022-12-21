@@ -1,0 +1,33 @@
+.history {
+   background-color: var(--pure-background);   
+}
+
+.row {
+    box-sizing: border-box;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    display: flex;
+}
+.numbering {
+    background-color: #9a9898;
+    padding: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+    box-sizing: border-box;
+    min-width: 25%;
+    flex-grow: 33%;
+}
+
+.whiteMove, .blackMove {
+    flex: 33%;
+    max-width: 33%;
+    padding: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.blackMove {
+    background: #000;
+    color: #fff;
+}

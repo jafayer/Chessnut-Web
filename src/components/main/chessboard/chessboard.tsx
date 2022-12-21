@@ -57,6 +57,7 @@ export default function Chessboard({
         viewOnly={false}
         movable={{ free: false, showDests: true }}
         disableContextMenu={true}
+        coordinates={true}
         highlight={{
           lastMove: true,
           check: true,

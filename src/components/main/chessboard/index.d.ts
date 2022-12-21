@@ -7,6 +7,7 @@ declare module "react-chessground" {
       promotion?: (e: string) => void;
       reset?: () => void;
       undo?: () => void;
+      coordinates: boolean,
       orientation: "white" | "black",
       draggable?: {
         enabled?: boolean,
