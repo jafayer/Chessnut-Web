@@ -17,7 +17,7 @@ export function Main({fen, orientation, playGame, reset, playing, pgn}:MainProps
             <Col xs={24} md={16}>
                 <Chessboard fen={fen ? fen : "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"} pgn={pgn} orientation={orientation} playing={playing}/>
             </Col>
-            <Col xs={12} md={6} style={{margin: "auto"}}>
+            <Col xs={18} md={6} style={{margin: "auto"}}>
                 <Sidebar playGame={playGame} reset={reset} playing={playing} pgn={pgn} />
             </Col>
         </Row>

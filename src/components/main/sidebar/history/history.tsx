@@ -21,6 +21,8 @@ export default function History({moves}:HistoryProps) {
             listStyleType: "none",
             padding: 0,
             margin: 0,
+            minHeight: 500,
+            width: "100%"
         }
     }
 }

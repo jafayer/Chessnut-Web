@@ -11,7 +11,7 @@ interface SidebarProps {
 
 export default function Sidebar({playGame, playing, reset, pgn}:SidebarProps) {
     return <div style={{padding: 15}}>
-        {pgn && <History moves={formatPgn(pgn)} />}
+        {playing && <History moves={formatPgn(pgn ? pgn : "")} />}
         <Button props={{block: true}} onClick={playing ? reset : playGame}>{playing ? "Reset" : "Play Locally"}</Button>
         <Button type="default" props={{block: true}}>Connect to Lichess</Button>
     </div>
