@@ -1,6 +1,6 @@
-import { useContext, ReactNode, MouseEventHandler } from "react";
-import { ThemeContext } from "../../../App";
+import { ReactNode, MouseEventHandler } from "react";
 import { Modal } from "antd";
+import { useAppSelector } from "../../../redux/hooks";
 
 interface ModalProps {
   children: ReactNode,
@@ -10,7 +10,7 @@ interface ModalProps {
   wrapClassName?: string,
 }
 export default function CustomModal({ children, open, onCancel, footer, wrapClassName}: ModalProps) {
-  const theme = useContext(ThemeContext);
+  const theme = useAppSelector((state) => state.theme.theme);
   return (
     <Modal
       bodyStyle={{ backgroundColor: theme === "light" ? "unset" : "black" }}

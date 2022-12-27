@@ -1,12 +1,11 @@
-import { useContext } from "react";
-import { ThemeContext } from "../../App";
+import { useAppSelector } from '../../redux/hooks';
 import Button from '../elements/button/button';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChessKnight } from "@fortawesome/free-solid-svg-icons";
 import { ConnectInterface } from "./connect.interface";
 
 export default function Connect({ handler }: ConnectInterface) {
-    const theme = useContext(ThemeContext)
+    const theme = useAppSelector((state) => state.theme.theme);
   return (
     <div
       style={{

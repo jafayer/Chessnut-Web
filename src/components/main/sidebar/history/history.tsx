@@ -1,6 +1,6 @@
-import {useState, useEffect, useContext} from "react";
-import { ThemeContext } from "../../../../App";
+import {useState, useEffect } from "react";
 import styles from "./history.module.scss";
+import { useAppSelector } from "../../../../redux/hooks";
 
 export type HistoryProps = {
     moves: string[][], // gotta fix that
@@ -9,7 +9,7 @@ export type HistoryProps = {
 
 
 export default function History({moves}:HistoryProps) {
-    const theme = useContext(ThemeContext);
+    const theme = useAppSelector((state) => state.theme.theme);
     return <ul style={computeStyles()}>
         {moves.map((move, index) => <HistoryRow move={move} index={index}/>)}
     </ul>

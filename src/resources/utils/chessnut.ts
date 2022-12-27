@@ -2,7 +2,7 @@ import { piece } from "./helpers/helpers";
 import * as chess from "chess.js";
 import { State } from "./gameState";
 import { BoardEmulator } from "./helpers/BoardEmulator";
-import {MODE} from "../../config.js";
+import {MODE} from "../../config";
 
 const files = "abcdefgh";
 const chessPieceMap: {[key:string]: piece }= {

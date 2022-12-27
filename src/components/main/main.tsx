@@ -1,4 +1,4 @@
-import {MouseEventHandler, useContext, useState} from 'react';
+import {MouseEventHandler, useState} from 'react';
 import {Col, Row} from "antd";
 import Chessboard from './chessboard/chessboard';
 import Sidebar from './sidebar/sidebar';

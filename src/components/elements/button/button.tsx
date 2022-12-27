@@ -1,5 +1,5 @@
-import { MouseEventHandler, ReactNode, useContext } from "react";
-import { ThemeContext } from "../../../App";
+import { MouseEventHandler, ReactNode } from "react";
+import { useAppSelector } from "../../../redux/hooks";
 import { Button } from "antd";
 import { SizeType } from "antd/es/config-provider/SizeContext";
 import { ButtonType } from "antd/es/button";
@@ -21,7 +21,7 @@ export default function DefaultButton({
   type,
   onClick,
 }: ButtonProps) {
-  const theme = useContext(ThemeContext);
+  const theme = useAppSelector((state) => state.theme.theme);
 
   return (
     <Button

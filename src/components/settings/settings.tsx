@@ -1,5 +1,6 @@
-import {useState, useContext} from "react";
-import { ThemeContext } from "../../App";
+import {useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { RootState } from "../../redux/store";
 import {Modal, Select} from "antd";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from "@fortawesome/free-solid-svg-icons";
@@ -9,7 +10,8 @@ interface SettingsProps {
     setTheme: CallableFunction
 }
 export default function Settings({setTheme}:SettingsProps) {
-    const theme = useContext(ThemeContext);
+    const theme = useAppSelector((state: RootState) => state.theme.theme);
+    const dispatch = useAppDispatch();
     const [open, setOpen] = useState(false);
     const handleOpen = () => {setOpen(true)};
     const handleClose = () => {setOpen(false)};
@@ -19,7 +21,7 @@ export default function Settings({setTheme}:SettingsProps) {
             <h1>Settings</h1>
             <div>
                 <h2>Theme</h2>
-                <Select style={{ width: 120 }} onChange={(e) => {setTheme(e)}} value={theme} options={[
+                <Select style={{ width: 120 }} onChange={(e) => {dispatch(setTheme(e))}} value={theme} options={[
                     {
                         value: "light",
                         label: "Light Mode",

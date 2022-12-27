@@ -1,5 +1,5 @@
-import { useState, useEffect, useContext } from "react";
-import { ThemeContext } from "../../../App";
+import { useState, useEffect} from "react";
+import { useAppSelector } from "../../../redux/hooks";
 import { Chess } from "chess.js";
 import { Tag } from "antd";
 import Chessground from "react-chessground";
@@ -23,7 +23,7 @@ export default function Chessboard({
   playing,
 }: ChessboardProps) {
   const [chess, setChess] = useState(new Chess());
-  const theme = useContext(ThemeContext);
+  const theme = useAppSelector((state) => state.theme.theme);
   useEffect(() => {
     if (pgn && pgn != chess.pgn()) {
       chess.loadPgn(pgn);

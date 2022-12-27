@@ -1,4 +1,4 @@
-import { useState, createContext, useContext, useEffect } from "react";
+import { useState } from "react";
 import "./App.scss";
 import { ChessNut, connect } from "./resources/utils/chessnut";
 import ChessBoard from "./components/chessboard";
@@ -7,29 +7,29 @@ import Settings from "./components/settings/settings";
 import { Main } from "./components/main/main";
 import Header from "./components/header/header";
 import {MODE} from "./config";
+import { useAppSelector } from "./redux/hooks";
+import { setTheme } from "./redux/features/themeSlice";
 
-
-export const ThemeContext = createContext("light");
 
 function App() {
-  const [theme, setTheme] = useState("light");
+  const theme = useAppSelector(state => state.theme.theme);
+
   const [board, setBoard] = useState<ChessNut | null>(null);
   const [fen, setFen] = useState<string | null>(null);
   const [pgn, setPgn] = useState<string | null>(null);
   const [playing, setPlaying] = useState<boolean>(false);
 
+  // @ts-ignore
   if(MODE === "development") {
     //@ts-ignore
     window.board = board;
   }
 
   return (
-    <ThemeContext.Provider value={theme}>
       <div className={"App"} data-theme={theme}>
         <Header setTheme={setTheme} />
         {connectOrMainScreen()}
       </div>
-    </ThemeContext.Provider>
   );
 
   function playGame(boardClass: typeof board) {
