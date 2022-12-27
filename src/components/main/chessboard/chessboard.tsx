@@ -11,17 +11,15 @@ import {
 import "react-chessground/dist/styles/chessground.css";
 
 interface ChessboardProps {
-  fen: string;
-  pgn?: string | null;
   orientation: "white" | "black";
   playing: boolean;
 }
 export default function Chessboard({
-  fen,
-  pgn,
   orientation,
   playing,
 }: ChessboardProps) {
+  const fen = useAppSelector(state => state.position.fen);
+  const pgn = useAppSelector(state => state.position.pgn);
   const [chess, setChess] = useState(new Chess());
   const theme = useAppSelector((state) => state.theme.theme);
   useEffect(() => {

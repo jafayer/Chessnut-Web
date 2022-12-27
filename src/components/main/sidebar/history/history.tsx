@@ -11,7 +11,7 @@ export type HistoryProps = {
 export default function History({moves}:HistoryProps) {
     const theme = useAppSelector((state) => state.theme.theme);
     return <ul style={computeStyles()}>
-        {moves.map((move, index) => <HistoryRow move={move} index={index}/>)}
+        {moves.map((move, index) => <HistoryRow key={index.toString()+move.toString()} move={move} index={index}/>)}
     </ul>
 
     function computeStyles(): object {
@@ -19,9 +19,10 @@ export default function History({moves}:HistoryProps) {
             backgroundColor: theme === "light" ? "#fff" : "#eee",
             borderRadius: 5,
             listStyleType: "none",
-            padding: 0,
-            margin: 0,
-            minHeight: 500,
+            padding: 5,
+            margin: 5,
+            height: 300,
+            overflowY: "scroll",
             width: "100%"
         }
     }

@@ -3,6 +3,7 @@ import * as chess from "chess.js";
 import { State } from "./gameState";
 import { BoardEmulator } from "./helpers/BoardEmulator";
 import {MODE} from "../../config";
+import { store } from "../../redux/store";
 
 const files = "abcdefgh";
 const chessPieceMap: {[key:string]: piece }= {
@@ -23,12 +24,12 @@ const chessPieceMap: {[key:string]: piece }= {
 
 export async function connect(
   callback: CallableFunction,
-  setBoardStateCB: CallableFunction,
   setPlaying: CallableFunction,
-  setPgn: CallableFunction
+  setPgn: CallableFunction,
+  routeUpdate: CallableFunction,
 ) {
   if(MODE === "development") {
-    const board = new ChessNut(new BoardEmulator(), setBoardStateCB, setPlaying, setPgn);
+    const board = new ChessNut(new BoardEmulator(), setPlaying, setPgn, routeUpdate);
     board.device.open();
     board.device.sendReport(0x21, new Uint8Array([0x01, 0x00]));
     return callback(board);
@@ -45,7 +46,7 @@ export async function connect(
     });
 
     if (device) {
-      const board = new ChessNut(device, setBoardStateCB, setPlaying, setPgn);
+      const board = new ChessNut(device, setPlaying, setPgn, routeUpdate);
       await board.device.open();
       await board.device.sendReport(0x21, new Uint8Array([0x01, 0x00]));
       board.boop(560, 100);
@@ -63,22 +64,22 @@ export class ChessNut {
   // Need these declared up top to stop typescript from complaining
   device;
   state: State;
-  boardStateCallback: CallableFunction;
   ledCoolDown: number;
   playing: boolean;
   setPlaying: CallableFunction;
-  setPgn: CallableFunction
+  setPgn: CallableFunction;
+  routeUpdate: CallableFunction;
 
-  constructor(device: any, setBoardState: CallableFunction, setPlaying: CallableFunction, setPgn: CallableFunction) {
+  constructor(device: any, setPlaying: CallableFunction, setPgn: CallableFunction, routeUpdate: CallableFunction) {
     // I don't think there's a good HID typings that exists?
     this.device = device;
-    this.boardStateCallback = setBoardState;
     this.ledCoolDown = 0;
     // initialize empty board state
     this.state = new State([])
     this.playing = false;
     this.setPlaying = setPlaying;
     this.setPgn = setPgn;
+    this.routeUpdate = routeUpdate;
     device.addEventListener("inputreport", (event: any) => {
       const { data, reportId } = event;
       const { productId } = event.device;
@@ -86,7 +87,12 @@ export class ChessNut {
         this.setBoardState(new Uint8Array(data.buffer).slice(1, 33));
       }
     });
-    this.boardStateCallback(this.state.getFEN());
+    this.routeUpdate({
+      type: "fen",
+      data: {
+        fen: this.state.getFEN(),
+      },
+    });
   }
 
   setLights(lights: Array<chess.Square>) {
@@ -163,12 +169,22 @@ export class ChessNut {
             // previousBoardState FEN  
             
         }
-        this.boardStateCallback(this.state.getFEN());
-        this.setPgn(this.state.chess.pgn());
+        this.routeUpdate({
+          type: "fen",
+          data: {
+            fen: this.state.getFEN(),
+            pgn: this.state.chess.pgn(),
+          },
+        })
     } else {
         // replace entire state with incomingState
         this.state.updateFromState(incomingState);
-        this.boardStateCallback(this.state.getFEN());
+        this.routeUpdate({
+          type: "fen",
+          data: {
+            fen: this.state.getFEN(),
+          },
+        })
     }
   }
 
@@ -177,7 +193,12 @@ export class ChessNut {
     this.playing = true;
     this.setPlaying(true);
     this.state.reset();
-    this.boardStateCallback(this.state.getFEN());
+    this.routeUpdate({
+      type: "fen",
+      data: {
+        fen: this.state.getFEN(),
+      },
+    })
   }
 
   reset() {

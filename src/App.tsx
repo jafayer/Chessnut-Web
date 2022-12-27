@@ -7,15 +7,15 @@ import Settings from "./components/settings/settings";
 import { Main } from "./components/main/main";
 import Header from "./components/header/header";
 import {MODE} from "./config";
-import { useAppSelector } from "./redux/hooks";
+import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { setTheme } from "./redux/features/themeSlice";
-
+import {setFEN} from "./redux/features/positionSlice";
 
 function App() {
   const theme = useAppSelector(state => state.theme.theme);
+  const dispatch = useAppDispatch();
 
   const [board, setBoard] = useState<ChessNut | null>(null);
-  const [fen, setFen] = useState<string | null>(null);
   const [pgn, setPgn] = useState<string | null>(null);
   const [playing, setPlaying] = useState<boolean>(false);
 
@@ -50,9 +50,17 @@ function App() {
 
   function connectOrMainScreen() {
     if(!board) {
-      return <Connect handler={() => {connect(setBoard, setFen, setPlaying, setPgn)}} />
+      return <Connect handler={() => {connect(setBoard, setPlaying, setPgn, routeUpdate)}} />
     } else {
-      return <Main orientation={"white"} fen={fen} playGame={() => {playGame(board)}} playing={playing} reset={() => {reset(board)}} pgn={pgn} />
+      return <Main orientation={"white"} playGame={() => {playGame(board)}} playing={playing} reset={() => {reset(board)}} />
+    }
+  }
+
+  function routeUpdate(update: {type: string, data: any}) {
+    console.log({update});
+    switch(update.type) {
+      case "fen":
+        dispatch(setFEN(update.data));
     }
   }
 }

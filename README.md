@@ -1,5 +1,5 @@
 # TODO:
-* [] Write readme
+* [x] Write readme
 * [] Configure redux store(s)
 * [] Create more consistent design language/themeing solution
   * Probably have to suck it up and use styled components or something
