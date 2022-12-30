@@ -1,6 +1,6 @@
 # TODO:
 * [x] Write readme
-* [] Configure redux store(s)
+* [x] Configure redux store(s)
 * [] Create more consistent design language/themeing solution
   * Probably have to suck it up and use styled components or something
 * [] Implement play history with lichess-like navigation

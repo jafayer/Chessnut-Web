@@ -1,4 +1,4 @@
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import { useAppSelector } from "../../../redux/hooks";
 import { Chess } from "chess.js";
 import { Tag } from "antd";
@@ -12,14 +12,11 @@ import "react-chessground/dist/styles/chessground.css";
 
 interface ChessboardProps {
   orientation: "white" | "black";
-  playing: boolean;
 }
-export default function Chessboard({
-  orientation,
-  playing,
-}: ChessboardProps) {
-  const fen = useAppSelector(state => state.position.fen);
-  const pgn = useAppSelector(state => state.position.pgn);
+export default function Chessboard({ orientation }: ChessboardProps) {
+  const fen = useAppSelector((state) => state.position.fen);
+  const pgn = useAppSelector((state) => state.position.pgn);
+  const playing = useAppSelector((state) => state.gameMetadata.playing);
   const [chess, setChess] = useState(new Chess());
   const theme = useAppSelector((state) => state.theme.theme);
   useEffect(() => {
@@ -64,7 +61,7 @@ export default function Chessboard({
       />
       <Tag
         style={{ margin: 5 }}
-        color={theme === "light" ? "green": "blue"}
+        color={theme === "light" ? "green" : "blue"}
         icon={
           <FontAwesomeIcon
             style={{ paddingRight: 10 }}

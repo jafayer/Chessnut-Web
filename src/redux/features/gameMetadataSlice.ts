@@ -17,12 +17,15 @@ export const gameMetadataSlice = createSlice({
     name: "gameMetadata",
     initialState,
     reducers: {
-        setGameMetadata: ((state, action: PayloadAction<GameMetadataState>) => {
-            state = {...state, ...action};
+        setPlaying: ((state, action: PayloadAction<GameMetadataState["playing"]>) => {
+            state.playing = action.payload;
+        }),
+        setOrientation: ((state, action: PayloadAction<GameMetadataState["orientation"]>) => {
+            state.orientation = action.payload;
         }),
     }
 });
 
-export const {setGameMetadata} = gameMetadataSlice.actions;
+export const {setPlaying, setOrientation} = gameMetadataSlice.actions;
 export default gameMetadataSlice.reducer;
 
