@@ -7,6 +7,8 @@
 * [] Implement wait for possible next move if exists
   * determine if piece moved could advance one or more squares further in the same direction, and wait to register move for 200ms if so
 * [] Implement local stockfish/bot playthrough
+* [] Separate connection logic from chessnut
+  * - Would like to be able to use ChessNut class in node
 * [] Implement play clock w/ increment options
 * [] Implement win condition & end-of-game state/functionality
   * probably after a game switch the game indicator to a "game over" indicator and display options in sidebar for: 

@@ -21,7 +21,7 @@ export default function Sidebar({reset}:SidebarProps) {
 
     const playGame = () => {
         dispatch(setPlaying(true));
-        board.setPlaying();
+        board.startGame();
     }
 
     return <div style={{padding: 15}}>

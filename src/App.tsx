@@ -9,7 +9,8 @@ import Header from "./components/header/header";
 import {MODE} from "./config";
 import { useAppDispatch, useAppSelector } from "./redux/hooks";
 import { setTheme } from "./redux/features/themeSlice";
-import {setFEN} from "./redux/features/positionSlice";
+import {setFEN, setPGN} from "./redux/features/positionSlice";
+import {EVENTS} from "./resources/utils/events/events";
 
 // This feels a little hacky, but...
 // We need to be able to pass events from the client to the chessnut class
@@ -27,8 +28,6 @@ function App() {
   const dispatch = useAppDispatch();
 
   const [board, setBoard] = useState<ChessNut | null>(null);
-  const [pgn, setPgn] = useState<string | null>(null);
-  const [playing, setPlaying] = useState<boolean>(false);
 
   // @ts-ignore
   if(MODE === "development") {
@@ -63,17 +62,18 @@ function App() {
 
   function connectOrMainScreen() {
     if(!board) {
-      return <Connect handler={() => {connect(setBoard, setPlaying, setPgn, routeUpdate)}} />
+      return <Connect handler={() => {connect(setBoard, routeUpdate)}} />
     } else {
       return <Main orientation={"white"} playGame={() => {playGame(board)}} reset={() => {reset(board)}} />
     }
   }
 
-  function routeUpdate(update: {type: string, data: any}) {
-    console.log({update});
+  function routeUpdate(update: EVENTS):void {
     switch(update.type) {
       case "fen":
         dispatch(setFEN(update.data));
+      case "pgn":
+        dispatch(setPGN(update.data));
     }
   }
 }

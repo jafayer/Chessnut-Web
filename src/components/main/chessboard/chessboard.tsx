@@ -10,13 +10,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import "react-chessground/dist/styles/chessground.css";
 
-interface ChessboardProps {
-  orientation: "white" | "black";
-}
-export default function Chessboard({ orientation }: ChessboardProps) {
+export default function Chessboard() {
   const fen = useAppSelector((state) => state.position.fen);
   const pgn = useAppSelector((state) => state.position.pgn);
   const playing = useAppSelector((state) => state.gameMetadata.playing);
+  const orientation = useAppSelector(state => state.gameMetadata.orientation);
   const [chess, setChess] = useState(new Chess());
   const theme = useAppSelector((state) => state.theme.theme);
   useEffect(() => {

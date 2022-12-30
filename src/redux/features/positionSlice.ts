@@ -14,15 +14,15 @@ export const positionSlice = createSlice({
     name: "position",
     initialState,
     reducers: {
-        setFEN: ((state, action: PayloadAction<PositionState>) => {
-            state.fen = action.payload.fen;
-            if(action.payload.pgn) {
-                state.pgn = action.payload.pgn
-            }
+        setFEN: ((state, action: PayloadAction<PositionState["fen"]>) => {
+            state.fen = action.payload;
         }),
+        setPGN: ((state, action: PayloadAction<PositionState["pgn"]>) => {
+            state.pgn = action.payload;
+        })
     }
 });
 
-export const {setFEN} = positionSlice.actions;
+export const {setFEN, setPGN} = positionSlice.actions;
 export default positionSlice.reducer;
 

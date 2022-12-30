@@ -4,6 +4,7 @@ import { State } from "./gameState";
 import { BoardEmulator } from "./helpers/BoardEmulator";
 import {MODE} from "../../config";
 import { store } from "../../redux/store";
+import { EVENTS } from "./events/events";
 
 const files = "abcdefgh";
 const chessPieceMap: {[key:string]: piece }= {
@@ -24,12 +25,10 @@ const chessPieceMap: {[key:string]: piece }= {
 
 export async function connect(
   callback: CallableFunction,
-  setPlaying: CallableFunction,
-  setPgn: CallableFunction,
-  routeUpdate: CallableFunction,
+  routeUpdate: (event: EVENTS) => void,
 ) {
   if(MODE === "development") {
-    const board = new ChessNut(new BoardEmulator(), setPlaying, setPgn, routeUpdate);
+    const board = new ChessNut(new BoardEmulator(), routeUpdate);
     board.device.open();
     board.device.sendReport(0x21, new Uint8Array([0x01, 0x00]));
     return callback(board);
@@ -46,7 +45,7 @@ export async function connect(
     });
 
     if (device) {
-      const board = new ChessNut(device, setPlaying, setPgn, routeUpdate);
+      const board = new ChessNut(device, routeUpdate);
       await board.device.open();
       await board.device.sendReport(0x21, new Uint8Array([0x01, 0x00]));
       board.boop(560, 100);
@@ -66,19 +65,15 @@ export class ChessNut {
   state: State;
   ledCoolDown: number;
   playing: boolean;
-  setPlaying: CallableFunction;
-  setPgn: CallableFunction;
-  routeUpdate: CallableFunction;
+  routeUpdate: (args: EVENTS) => void;
 
-  constructor(device: any, setPlaying: CallableFunction, setPgn: CallableFunction, routeUpdate: CallableFunction) {
+  constructor(device: any, routeUpdate: (event: EVENTS) => void) {
     // I don't think there's a good HID typings that exists?
     this.device = device;
     this.ledCoolDown = 0;
     // initialize empty board state
     this.state = new State([])
     this.playing = false;
-    this.setPlaying = setPlaying;
-    this.setPgn = setPgn;
     this.routeUpdate = routeUpdate;
     device.addEventListener("inputreport", (event: any) => {
       const { data, reportId } = event;
@@ -89,9 +84,7 @@ export class ChessNut {
     });
     this.routeUpdate({
       type: "fen",
-      data: {
-        fen: this.state.getFEN(),
-      },
+      data: this.state.getFEN(),
     });
   }
 
@@ -171,19 +164,18 @@ export class ChessNut {
         }
         this.routeUpdate({
           type: "fen",
-          data: {
-            fen: this.state.getFEN(),
-            pgn: this.state.chess.pgn(),
-          },
+          data: this.state.getFEN(),
+        });
+        this.routeUpdate({
+          type: "pgn",
+          data: this.state.chess.pgn(),
         })
     } else {
         // replace entire state with incomingState
         this.state.updateFromState(incomingState);
         this.routeUpdate({
           type: "fen",
-          data: {
-            fen: this.state.getFEN(),
-          },
+          data: this.state.getFEN(),
         })
     }
   }
@@ -191,14 +183,11 @@ export class ChessNut {
   startGame() {
     this.boop(880, 100);
     this.playing = true;
-    this.setPlaying(true);
     this.state.reset();
     this.routeUpdate({
       type: "fen",
-      data: {
-        fen: this.state.getFEN(),
-      },
-    })
+      data: this.state.getFEN(),
+    });
   }
 
   reset() {

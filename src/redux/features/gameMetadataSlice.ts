@@ -4,8 +4,8 @@ import type {PayloadAction} from "@reduxjs/toolkit";
 // controls game state features such as orientation and playingState
 
 export interface GameMetadataState {
-    playing?: boolean;
-    orientation?: "black"|"white",
+    playing: boolean;
+    orientation: "black"|"white",
 }
 
 const initialState: GameMetadataState = {
