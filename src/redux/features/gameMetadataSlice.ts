@@ -6,11 +6,15 @@ import type {PayloadAction} from "@reduxjs/toolkit";
 export interface GameMetadataState {
     playing: boolean;
     orientation: "black"|"white",
+    timeControl: "realTime" | "correspondence",
+    increment?: number,
+    timeRemaining?: number,
 }
 
 const initialState: GameMetadataState = {
     playing: false,
     orientation: "white",
+    timeControl: "correspondence",
 }
 
 export const gameMetadataSlice = createSlice({

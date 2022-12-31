@@ -48,7 +48,6 @@ export default function History({ moves }: HistoryProps) {
       margin: 5,
       height: 300,
       overflowY: "scroll",
-      width: "100%",
     };
   }
 }

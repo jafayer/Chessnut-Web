@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { BoardContext } from "../../../App";
 import { useAppSelector } from "../../../redux/hooks";
 import { Chess } from "chess.js";
 import { Tag } from "antd";
@@ -11,6 +12,7 @@ import {
 import "react-chessground/dist/styles/chessground.css";
 
 export default function Chessboard() {
+  const board = useContext(BoardContext);
   const fen = useAppSelector((state) => state.position.fen);
   const pgn = useAppSelector((state) => state.position.pgn);
   const playing = useAppSelector((state) => state.gameMetadata.playing);
@@ -22,6 +24,15 @@ export default function Chessboard() {
       chess.loadPgn(pgn);
     }
   }, [pgn]);
+  useEffect(() => {
+    if(!board) return;
+
+    if(playing && board.state.chess.isGameOver()) { // really gotta make this an API
+      window.setTimeout(() => { // also fuck this lol
+        alert("game over!");
+      })
+    }
+  }, [pgn])
 
   useEffect(() => {
     setBoardSize(Math.floor(window.innerWidth * 0.66));

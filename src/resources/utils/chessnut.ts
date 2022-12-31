@@ -66,6 +66,7 @@ export class ChessNut {
   ledCoolDown: number;
   playing: boolean;
   routeUpdate: (args: EVENTS) => void;
+  excludedMoves: (string | chess.Move)[];
 
   constructor(device: any, routeUpdate: (event: EVENTS) => void) {
     // I don't think there's a good HID typings that exists?
@@ -74,6 +75,7 @@ export class ChessNut {
     // initialize empty board state
     this.state = new State([])
     this.playing = false;
+    this.excludedMoves = [];
     this.routeUpdate = routeUpdate;
     device.addEventListener("inputreport", (event: any) => {
       const { data, reportId } = event;
@@ -152,6 +154,10 @@ export class ChessNut {
         // could result in incomingState
         const possibleMove = this.state.possibleMove(incomingState);
         if(possibleMove) {
+            if(this.excludedMoves.includes(possibleMove)) {
+              return;
+            }
+
             this.state.chess.move(possibleMove);
             if(this.state.chess.inCheck()) {
                 this.boop(440, 100);
@@ -193,6 +199,23 @@ export class ChessNut {
   reset() {
     this.setLights([]);
     this.startGame();
+  }
+
+  undoMove() {
+    // make sure the move won't just become redone on next tick
+    const mostRecentMove = this.state.chess.history().slice(-1)[0];
+    this.excludedMoves = [...this.excludedMoves, mostRecentMove];
+    // undo the move
+    this.state.chess.undo();
+    // game state is awaiting an undo
+    this.routeUpdate({
+      type: "fen",
+      data: this.state.getFEN(),
+    });
+    this.routeUpdate({
+      type: "pgn",
+      data: this.state.chess.pgn(),
+    })
   }
 
   private extractNibbles(uiarr: Uint8Array): Array<number> {
